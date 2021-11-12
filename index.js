@@ -22,6 +22,44 @@ async function run() {
         const productsCollection = database.collection('products')
         const buyCollection = database.collection('buyProduct')
         const reviewCollection = database.collection('userReview')
+        const usersCollection = database.collection('users')
+
+        // insert an user
+        app.post('/users', async (req, res) => {
+            const user = req.body
+            const result = await usersCollection.insertOne(user)
+            res.json(result)
+        })
+        // update role
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email }
+            const options = { upsert: true }
+            const updateDoc = { $set: user }
+            const result = await usersCollection.updateOne(filter, updateDoc, options)
+            res.json(result)
+          })
+        //make admin
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body
+            // const requester = req.decodedEmail;
+            const filter = { email: user.email }
+            const updateDoc = { $set: { role: 'admin' } }
+            const result = await usersCollection.updateOne(filter, updateDoc)
+            res.json(result)
+            // if (requester) {
+            //     const requesterAccount = await usersCollection.findOne({ email: requester })
+            //     if (requesterAccount.role === 'admin') {
+            //         const filter = { email: user.email }
+            //         const updateDoc = { $set: { role: 'admin' } }
+            //         const result = await usersCollection.updateOne(filter, updateDoc)
+            //         res.json(result)
+            //     }
+            // }
+            // else {
+            //     res.status(403).json({ message: 'you do not have access to Make Admin ' })
+            // }
+        })
 
 
         //Get Api
@@ -90,16 +128,16 @@ async function run() {
         app.put('/updateStatus/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body.status;
-            const filter = {_id :ObjectId(id)};
+            const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                  status: status
+                    status: status
                 },
-              };
+            };
             const result = await buyCollection.updateOne(filter, updateDoc, options);
             res.json(result)
-            
+
         })
     }
     finally {
